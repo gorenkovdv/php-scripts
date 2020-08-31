@@ -7,14 +7,17 @@ if($_SERVER["REQUEST_METHOD"] == "GET"):
 	$uid = intval($_GET["uid"]);
 	
 	$requests = array();
-	$sql = "SELECT r.`ID` `requestID`, c.*, DATE(r.`CreateDate`) `RequestCreateDate` FROM `requests` r LEFT JOIN `courses` c ON c.`ID` =  r.`CourseID`
-	WHERE r.`IsDeleted` = 0 AND r.`ID` IN (SELECT `RequestID` FROM `requests_listeners` WHERE `UserID` = '".$uid."')
+	$sql = "SELECT r.`ID` `requestID`, c.*, DATE(r.`CreateDate`) `RequestCreateDate`, rl.`RequestCME`, rl.`ID` `rowID`
+	FROM `requests` r LEFT JOIN `courses` c ON c.`ID` = r.`CourseID`
+	LEFT JOIN `requests_listeners` rl ON r.`ID` = rl.`RequestID`
+	WHERE r.`IsDeleted` = 0 AND rl.`UserID` = '".$uid."'
 	ORDER BY c.`BeginDate`";
 	$data["sql"] = $sql;
 	if($dbResult = $link->query($sql)):
 		$data["response"] = 1;
 		if($dbResult->num_rows > 0):
 			while($arResult = $dbResult->fetch_assoc()):
+				if(!strlen($arResult["RequestCME"])) $arResult["RequestCME"] = null;
 				$requests[] = $arResult;
 			endwhile;
 		endif;

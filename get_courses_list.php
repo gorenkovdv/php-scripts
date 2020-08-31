@@ -132,7 +132,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"):
 					
 					$data["coursesIDs"] = $coursesIDs;
 					$sql = "SELECT r.`CourseID`, r.`CourseGUID`, rl.`ID` `rowID`, rl.`UserID`, rl.`Comment`, rl.`CathedraEmployee`, rl.`CathedraComment`, rl.`CathedraCheck`, rl.`CathedraAllow`,
-						rl.`InstituteEmployee`, rl.`InstituteComment`, rl.`InstituteCheck`, rl.`InstituteAllow`, u.`username`, u.`last_update` `lastUpdate`,
+						rl.`InstituteEmployee`, rl.`InstituteComment`, rl.`InstituteCheck`, rl.`InstituteAllow`, rl.`RequestCME`, u.`username`, u.`last_update` `lastUpdate`,
 						CONCAT_WS(' ', u.`lastname`, u.`firstname`, u.`middlename`) `fullname`
 						FROM `requests` r LEFT JOIN `requests_listeners` rl ON r.`ID` = rl.`RequestID` LEFT JOIN `users` u ON u.`ID` = rl.`UserID`
 						WHERE r.`CourseID` IN ('".implode("','", $coursesIDs)."') AND rl.`UserID` IS NOT NULL AND r.`IsDeleted` = 0";
@@ -142,13 +142,13 @@ if($_SERVER["REQUEST_METHOD"] == "POST"):
 							while($arResult = $dbResult->fetch_assoc()):
 								$checks = array(
 									"cathedra" => array(
-										"date" => formatData("d.m.Y H:i:s", $arResult["CathedraCheck"]),
+										"date" => formatDate("d.m.Y H:i:s", $arResult["CathedraCheck"]),
 										"comment" => $arResult["CathedraComment"],
 										"person" => $arResult["CathedraEmployee"],
 										"label" => ""
 									),
 									"institute" => array(
-										"date" => formatData("d.m.Y H:i:s", $arResult["InstituteCheck"]),
+										"date" => formatDate("d.m.Y H:i:s", $arResult["InstituteCheck"]),
 										"comment" => $arResult["InstituteComment"],
 										"person" => $arResult["InstituteEmployee"],
 										"label" => ""
@@ -162,18 +162,21 @@ if($_SERVER["REQUEST_METHOD"] == "POST"):
 								if(strlen($checks["institute"]["comment"]) > 0):
 									$checks["institute"]["label"] = ": ".$checks["institute"]["date"]." ".$checks["institute"]["person"];
 								endif;
+
 								
 								$courses[$arResult["CourseID"]]["users"][] = array(
 									"id" => $arResult["UserID"],
 									"rowID" => $arResult["rowID"],
 									"username" => $arResult["username"],
 									"fullname" => $arResult["fullname"],
-									"lastUpdate" => formatData("d.m.Y H:i:s", $arResult["lastUpdate"]),
+									"lastUpdate" => formatDate("d.m.Y H:i:s", $arResult["lastUpdate"]),
+									"requestCME" => (strlen($arResult["RequestCME"]) > 0) ? $arResult["RequestCME"] : null,
 									"comment" => $arResult["Comment"],
 									"cathedraAllow" => $arResult["CathedraAllow"],
 									"instituteAllow" => $arResult["InstituteAllow"],
 									"checks" => $checks
 								);
+
 							endwhile;
 						endif;
 					endif;
