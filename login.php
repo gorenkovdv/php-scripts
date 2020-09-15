@@ -28,6 +28,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"):
 			$isUserExist = true;
 			$arUser = $dbResult->fetch_assoc();
 			$dbRefreshKey = $arUser["secondKey"];
+			$data["arUser"] = $arUser;
 		endif;
 	else:
 		$data["error"] = "Ошибка при выполнении запроса 1";
@@ -167,7 +168,7 @@ if($isUserExist):
 	endif;
 	
 	$dbStructures = array(); $newStructures = array();
-	$sql = "SELECT * FROM `users_departments` WHERE `uid` = '".$arUser["uid"]."'";
+	$sql = "SELECT * FROM `users_departments` WHERE `uid` = '".$arUser["id"]."'";
 	$data["sql"][] = $sql;
 	if($dbResult = $link->query($sql)):
 		if($dbResult->num_rows > 0):
@@ -175,6 +176,7 @@ if($isUserExist):
 			$dbStructures[] = $arStructure["departmentGUID"];
 		endif;
 		
+		if(is_array($arStructures["list"]))
 		foreach($arStructures["list"] as $arStructure):
 			if(!in_array($arStructure["StructureGUID"], $dbStructures) && !isset($newStructures[$arStructure["StructureGUID"]])):
 				$newStructures[$arStructure["StructureGUID"]] = array(
