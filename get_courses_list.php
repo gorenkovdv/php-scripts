@@ -119,7 +119,6 @@ if($_SERVER["REQUEST_METHOD"] == "POST"):
 						$arResult["users"] = array();
 						$coursesIDs[] = $arResult["ID"];
 						
-						if(isset($userRequests[$arResult["ID"]])): $arResult["haveRequest"] = 1; endif;
 						$arResult["BeginDateMonth"] = date('m', strtotime($arResult["RequestDate"]));
 						if($arResult["BeginDateMonth"] < 8): $arResult["StartDateTooltip"] = "проводится дистанционно";
 						else:
