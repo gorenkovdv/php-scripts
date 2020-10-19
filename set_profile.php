@@ -13,7 +13,8 @@ if($_SERVER["REQUEST_METHOD"] == "PUT"):
 	
 	$birthdate = ($_PUT["birthDate"] != "") ? "'".date("Y-m-d", strtotime($_PUT["birthDate"]))."'" : "NULL";
 	
-	$sql = "UPDATE `users` SET `lastname` = '".$_PUT["lastName"]."', `firstname` = '".$_PUT["firstName"]."', `middlename` = '".$_PUT["middleName"]."', `email` = '".$_PUT["email"]."', `birthdate` = ".$birthdate.", `phone` = '".$_PUT["phone"]."', `snils` = '".$_PUT["snils"]."' WHERE `id` = '{$uid}'";
+	$sql = "UPDATE `users` SET `lastname` = '".$_PUT["lastname"]."', `firstname` = '".$_PUT["firstname"]."', `middlename` = '".$_PUT["middlename"]."', 
+		`email` = '".$_PUT["email"]."', `birthdate` = ".$birthdate.", `phone` = '".$_PUT["phone"]."', `snils` = '".$_PUT["snils"]."' WHERE `id` = '{$uid}'";
 	
 	if($link->query($sql)):
 		$data["response"] = 1;
