@@ -1,6 +1,7 @@
 <?php
 require("./dbconnection.php");
 require("./generate_token.php");
+require("./functions.php");
 
 $data = array("get" => $_GET, "response" => 0);
 
@@ -19,15 +20,8 @@ if($_SERVER["REQUEST_METHOD"] == "GET"):
 
 		/* Обновление данных пользователя */
 		$username = strtolower($arUser["username"]);
-		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-		curl_setopt($ch, CURLOPT_URL, "https://accounts.asmu.local/api/public/users/fio?login={$username}");
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		$jsonInfo = curl_exec($ch);
-		curl_setopt($ch, CURLOPT_URL, "https://accounts.asmu.local/api/public/users/structures?login={$username}");
-		$jsonStructures = curl_exec($ch);
-		curl_close($ch);
+		$jsonInfo = curl_get("https://accounts.asmu.local/api/public/users/fio?login={$username}");
+		$jsonStructures = curl_get("https://accounts.asmu.local/api/public/users/structures?login={$username}");
 		
 		$arInfo = json_decode($jsonInfo, true);
 		$arStructures = json_decode($jsonStructures, true);
@@ -57,15 +51,16 @@ if($_SERVER["REQUEST_METHOD"] == "GET"):
 				$dbStructures[] = $arStructure["departmentGUID"];
 			endif;
 			
-			if(is_array($arStructures["list"]))
-			foreach($arStructures["list"] as $arStructure):
-				if(!in_array($arStructure["StructureGUID"], $dbStructures) && !isset($newStructures[$arStructure["StructureGUID"]])):
-					$newStructures[$arStructure["StructureGUID"]] = array(
-						"name" => $arStructure["Structure"],
-						"GUID" => $arStructure["StructureGUID"]
-					);
-				endif;
-			endforeach;
+			if(is_array($arStructures["list"])):
+				foreach($arStructures["list"] as $arStructure):
+					if(!in_array($arStructure["StructureGUID"], $dbStructures) && !isset($newStructures[$arStructure["StructureGUID"]])):
+						$newStructures[$arStructure["StructureGUID"]] = array(
+							"name" => $arStructure["Structure"],
+							"GUID" => $arStructure["StructureGUID"]
+						);
+					endif;
+				endforeach;
+			endif;
 			
 			if(count($newStructures) > 0):
 				$i = 0;
@@ -100,7 +95,7 @@ if($_SERVER["REQUEST_METHOD"] == "GET"):
 			"email" => $arUser["email"],
 			"phone" => $arUser["phone"],
 			"snils" => $arUser["snils"],
-			"birthDate" => $arUser["birthdate"]
+			"birthdate" => $arUser["birthdate"]
 		);
 	else: $data["error"] = "Ошибка при выполнении запроса";
 	endif;

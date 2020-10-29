@@ -1,6 +1,7 @@
 <?php
 require("./dbconnection.php");
 require("./generate_token.php");
+require("./functions.php");
 
 $username = $_POST["username"];
 $data = array("username" => $username, "response" => 0, "sql" => array());
@@ -78,15 +79,9 @@ if($_SERVER["REQUEST_METHOD"] == "POST"):
 			else: $data["error"] = "Нет соединения c LDAP";
 			endif;
 		else:
-			$ch = curl_init();
-			curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-			curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-			curl_setopt($ch, CURLOPT_URL, "https://accounts.asmu.local/api/public/users/check/init/{$username}");
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-			$jsonOutput = curl_exec($ch);
+			$jsonOutput = curl_get("https://accounts.asmu.local/api/public/users/check/init/{$username}");
 			$output = json_decode($jsonOutput, true);
-			curl_close($ch);
-			
+		
 			if($output["reset"]):
 				if($isUserExist): $sql = "UPDATE `users` SET `firstKey` = '{$key}', `secondKey` = '{$refreshKey}', `ip` = '{$ip}' WHERE `username` = '{$username}'";
 				else: $sql = "INSERT INTO `users` (`firstKey`, `secondKey`, `ip`, `username`, `reg_address`, `fact_address`, `passport`) VALUES ('{$key}', '{$refreshKey}', '{$ip}', '{$username}', '', '', '')";

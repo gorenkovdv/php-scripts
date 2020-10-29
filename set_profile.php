@@ -11,10 +11,11 @@ if($_SERVER["REQUEST_METHOD"] == "PUT"):
 	
 	$uid = intval($_PUT["uid"]);
 	
-	$birthdate = ($_PUT["birthDate"] != "") ? "'".date("Y-m-d", strtotime($_PUT["birthDate"]))."'" : "NULL";
+	$birthdate = ($_PUT["birthdate"] != "") ? "'".formatDate("Y-m-d", $_PUT["birthdate"])."'" : "NULL";
 	
-	$sql = "UPDATE `users` SET `lastname` = '".$_PUT["lastname"]."', `firstname` = '".$_PUT["firstname"]."', `middlename` = '".$_PUT["middlename"]."', 
-		`email` = '".$_PUT["email"]."', `birthdate` = ".$birthdate.", `phone` = '".$_PUT["phone"]."', `snils` = '".$_PUT["snils"]."' WHERE `id` = '{$uid}'";
+	$sql = "UPDATE `users` SET `email` = '".$_PUT["email"]."', `birthdate` = ".$birthdate.", `phone` = '".$_PUT["phone"]."',
+		`snils` = '".$_PUT["snils"]."' WHERE `id` = '{$uid}'";
+	$data["sql"] = $sql;
 	
 	if($link->query($sql)):
 		$data["response"] = 1;

@@ -15,10 +15,10 @@ if($_SERVER["REQUEST_METHOD"] == "POST"):
 	$phone = $_POST["phone"];
 	$snils = $_POST["snils"];
 	$email = $_POST["email"];
-	$birthdate = (strlen($_POST["birthDate"])) ? "'".date("Y-m-d", strtotime($_POST["birthDate"]))."'" : "NULL";
+	$birthdate = (strlen($_POST["birthdate"])) ? "'".formatDate("Y-m-d", $_POST["birthdate"])."'" : "NULL";
 	$ip = $_SERVER['REMOTE_ADDR'];
 
-	$birthdateQuery = ""; if(strlen($_POST["birthDate"])) $birthdateQuery = " AND `birthdate` = ".$birthdate;
+	$birthdateQuery = ""; if(strlen($_POST["birthdate"])) $birthdateQuery = " AND `birthdate` = ".$birthdate;
 	$sql = "SELECT COUNT(*) FROM `users` WHERE `firstname` = '".$firstname."' AND `lastname` = '".$lastname."' AND `middlename` = '".$middlename."' ".$birthdateQuery;
 	$data["sql"][] = $sql;
 	if($dbResult = $link->query($sql)):
