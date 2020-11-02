@@ -83,6 +83,13 @@ if($_SERVER["REQUEST_METHOD"] == "POST"):
 	
 	if($arFilters["forDoctors"] && !$arFilters["forNursingStaff"]): $filters .= " AND `ListenersGroup` = 'Врачи'"; endif;
 	if(!$arFilters["forDoctors"] && $arFilters["forNursingStaff"]): $filters .= " AND `ListenersGroup` = 'Средний медицинский персонал'"; endif;
+
+	if(!is_null($arFilters["searchUser"]) && strlen($arFilters["searchUser"])):
+		$filters .= "AND `ID` IN (SELECT r.`CourseID` FROM `requests` r
+		LEFT JOIN `requests_listeners` rl ON rl.`RequestID` = r.`ID`
+		LEFT JOIN `users` u ON u.`ID` = rl.`UserID`
+		WHERE r.`IsDeleted` = 0 AND u.id = '".$arFilters["searchUser"]."')";
+	endif;
 	
 	$sql = "SELECT COUNT(*) `count` FROM `courses` с WHERE 1 = 1 ".$filters."";
 	$data["sql"][] = $sql;
