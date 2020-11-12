@@ -7,7 +7,7 @@ if($_SERVER["REQUEST_METHOD"] == "GET"):
 	$uid = intval($_GET["uid"]);
 	
 	$requests = array();
-	$sql = "SELECT r.`ID` `requestID`, c.*, DATE(r.`CreateDate`) `RequestCreateDate`, rl.`RequestCME`, rl.`ID` `rowID`
+	$sql = "SELECT r.`ID` `requestID`, r.`DocumentsApproved`, c.*, DATE(r.`CreateDate`) `RequestCreateDate`, rl.`RequestCME`, rl.`ID` `rowID`
 	FROM `requests` r LEFT JOIN `courses` c ON c.`ID` = r.`CourseID`
 	LEFT JOIN `requests_listeners` rl ON r.`ID` = rl.`RequestID`
 	WHERE r.`IsDeleted` = 0 AND rl.`UserID` = '".$uid."'

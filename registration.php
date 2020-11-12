@@ -1,6 +1,7 @@
 <?php
 require("./dbconnection.php");
 require("./generate_token.php");
+require("./functions.php");
 
 $data = array("post" => $_POST, "response" => 0);
 

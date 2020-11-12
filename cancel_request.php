@@ -4,11 +4,9 @@ require("./dbconnection.php");
 $data = array("post" => $_POST, "response" => 0, "sql" => array());
 
 if($_SERVER["REQUEST_METHOD"] == "POST"):
-	$courseID = intval($_POST["courseID"]);
-	$rowID = intval($_POST["rowID"]);
+	$requestID = intval($_POST["requestID"]);
 	
-	$sql = "UPDATE `requests` SET `IsDeleted` = 1 WHERE `CourseID` = '".$courseID."' AND `ID` IN
-	(SELECT `RequestID` FROM `requests_listeners` WHERE `ID` = '".$rowID."')";
+	$sql = "UPDATE `requests` SET `IsDeleted` = 1 WHERE `ID` = '".$requestID."'";
 	$data["sql"][] = $sql;
 	if($link->query($sql)):
 		$data["response"] = 1;
