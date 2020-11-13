@@ -137,7 +137,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"):
 					endwhile;
 					
 					$data["coursesIDs"] = $coursesIDs;
-					$sql = "SELECT r.`CourseID`, r.`CourseGUID`, rl.`ID` `rowID`, rl.`UserID`, rl.`Comment`, rl.`CathedraEmployee`, rl.`CathedraComment`, rl.`CathedraCheck`, rl.`CathedraAllow`,
+					$sql = "SELECT r.`ID` `requestID`, r.`CourseID`, r.`CourseGUID`, rl.`ID` `rowID`, rl.`UserID`, rl.`Comment`, rl.`CathedraEmployee`, rl.`CathedraComment`, rl.`CathedraCheck`, rl.`CathedraAllow`,
 						rl.`InstituteEmployee`, rl.`InstituteComment`, rl.`InstituteCheck`, rl.`InstituteAllow`, rl.`RequestCME`, u.`username`, u.`last_update` `lastUpdate`,
 						CONCAT_WS(' ', u.`lastname`, u.`firstname`, u.`middlename`) `fullname`
 						FROM `requests` r LEFT JOIN `requests_listeners` rl ON r.`ID` = rl.`RequestID` LEFT JOIN `users` u ON u.`ID` = rl.`UserID`
@@ -172,6 +172,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"):
 								
 								$courses[$arResult["CourseID"]]["users"][] = array(
 									"id" => $arResult["UserID"],
+									"requestID" => $arResult["requestID"],
 									"rowID" => $arResult["rowID"],
 									"username" => $arResult["username"],
 									"fullname" => $arResult["fullname"],

@@ -4,9 +4,13 @@ require("./dbconnection.php");
 $data = array("post" => $_POST, "response" => 0, "sql" => array());
 
 if($_SERVER["REQUEST_METHOD"] == "POST"):
-	$requestID = intval($_POST["requestID"]);
+	if(isset($_POST["requestID"])): $requestID = intval($_POST["requestID"]); endif;
+	if(isset($_POST["rowID"])): $rowID = intval($_POST["rowID"]); endif;
 	
-	$sql = "UPDATE `requests` SET `IsDeleted` = 1 WHERE `ID` = '".$requestID."'";
+	if(isset($requestID)): $sql = "UPDATE `requests` SET `IsDeleted` = 1 WHERE `ID` = '".$requestID."'";
+	elseif(isset($rowID)): $sql = "DELETE FROM `requests_listeners` WHERE `ID` = '".$rowID."'";
+	endif;
+
 	$data["sql"][] = $sql;
 	if($link->query($sql)):
 		$data["response"] = 1;
