@@ -1,5 +1,6 @@
 <?php
 require("./dbconnection.php");
+require("./functions.php");
 
 parse_str(file_get_contents("php://input"), $_PUT);
 $data = array("put" => $_PUT, "response" => 0);

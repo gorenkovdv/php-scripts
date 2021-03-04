@@ -56,7 +56,7 @@ function program_from_1C($dbCourses, $debug = false){
 			if (is_soap_fault($resultF)):
 				trigger_error("SOAP Fault: (faultcode: {$resultF->faultcode}, faultstring: {$resultF->faultstring})", E_ERROR);
 			endif;
-			echo "<pre>"; print_r($resultF); echo "</pre>";
+			//echo "<pre>"; print_r($resultF); echo "</pre>";
 		endif;
 		
 		if (!is_soap_fault($resultF)):
@@ -64,46 +64,51 @@ function program_from_1C($dbCourses, $debug = false){
 			$res = (array)$res1->return->Course;
 			
 			$opp_arr = array();
-			foreach ($res as $ob_opp) $opp_arr[] = (array)$ob_opp;
-			
-			$insert_arr = array();
-			
-			$departments = array();
-			
-			foreach($opp_arr as $fields):
-				if($field["DelStatus"] != 1 && !isset($dbCourses[$fields["UIDCourse"]]))
-				$insert_arr[] = array(
-					"Name" => $fields["CourseName"],
-					"GUID" => $fields["UIDCourse"],
-					"Price" => $fields["Cost"],
-					"Speciality" => $fields["Spec"],
-					"AdditionalSpecialities" => parseAdditionalSpecialities($fields["DopSpec"]),
-					"EGS" => $fields["UGS"],
-					"ProfEducationType" => $fields["Kind"],
-					"Volume" => $fields["Chasov"],
-					"BeginDate" => convertDate($fields["DateBeg"]),
-					"EndDate" => convertDate($fields["DateEnd"]),
-					"EducationForm" => $fields["Form"],
-					"Department" => $fields["Kafedra"],
-					"DepartmentGUID" => $fields["UIDKafedra"],
-					"ListenersGroup" => listenersGroup($fields["Forwho"]),
-					"IsCME" => $fields["NMOStatus"],
-					"MoodleID" => ($fields["MoodleID"] != "") ? $fields["MoodleID"] : "NULL",
-					"Territory" => $fields["Territory"],
-					"FullTimeBeginDate" => convertDate($fields["DateOch"]),
-					"FullTimeEndDate" => convertDate($fields["DateOchEnd"]),
-					"RequestDate" => convertDate($fields["DateZ"]),
-					"SertificationExamDate" => convertDate($fields["DateExam"]),
-					"IsEducationDistance" => $fields["DateOch"] == '0001-01-02' ? 1 : 0,
-				);
-				
-				if(!isset($departments[$fields["UIDKafedra"]])) $departments[$fields["UIDKafedra"]] = array(
-					"name" => $fields["Kafedra"],
-					"GUID" => $fields["UIDKafedra"]
-				);
+			foreach ($res as $ob_opp):
+				$opp_arr[] = (array)$ob_opp;
 			endforeach;
 			
-			echo "<pre>"; print_r($insert_arr); echo "</pre>";
+			$insert_arr = array();
+			$departments = array();
+			
+			$i = 0;
+			foreach($opp_arr as $fields):
+				if($field["DelStatus"] != 1 && !isset($dbCourses[$fields["UIDCourse"]])):
+					$insert_arr[] = array(
+						"Name" => $fields["CourseName"],
+						"GUID" => $fields["UIDCourse"],
+						"Price" => intval($fields["Cost"]),
+						"Speciality" => $fields["Spec"],
+						"AdditionalSpecialities" => parseAdditionalSpecialities($fields["DopSpec"]),
+						"EGS" => $fields["UGS"],
+						"ProfEducationType" => $fields["Kind"],
+						"Volume" => $fields["Chasov"],
+						"BeginDate" => convertDate($fields["DateBeg"]),
+						"EndDate" => convertDate($fields["DateEnd"]),
+						"EducationForm" => $fields["Form"],
+						"Department" => $fields["Kafedra"],
+						"DepartmentGUID" => $fields["UIDKafedra"],
+						"ListenersGroup" => listenersGroup($fields["Forwho"]),
+						"IsCME" => $fields["NMOStatus"],
+						"MoodleID" => ($fields["MoodleID"] != "") ? $fields["MoodleID"] : "NULL",
+						"Territory" => $fields["Territory"],
+						"FullTimeBeginDate" => convertDate($fields["DateOch"]),
+						"FullTimeEndDate" => convertDate($fields["DateOchEnd"]),
+						"RequestDate" => convertDate($fields["DateZ"]),
+						"SertificationExamDate" => convertDate($fields["DateExam"]),
+						"IsEducationDistance" => $fields["DateOch"] == '0001-01-02' ? 1 : 0,
+					);
+				endif;
+				
+				if(!isset($departments[$fields["UIDKafedra"]])):
+						$departments[$fields["UIDKafedra"]] = array(
+							"name" => $fields["Kafedra"],
+							"GUID" => $fields["UIDKafedra"]
+						);
+				endif;
+			endforeach;
+			
+			//echo "<pre>"; print_r($insert_arr); echo "</pre>";
 			//echo "<pre>"; print_r($departments); echo "</pre>";
 			
 			foreach($departments as $department):
@@ -132,6 +137,7 @@ function program_from_1C($dbCourses, $debug = false){
 				endforeach;
 				
 				$sql = "INSERT INTO `courses` (".$headers.") VALUES ".$values;
+				//echo "<p style='word-break: break-all'>"; print_r($sql); echo "</p>";
 				//if(!$link->query($sql)) echo $link->error;
 			ENDIF;
 		endif;

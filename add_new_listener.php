@@ -51,7 +51,8 @@ if($_SERVER["REQUEST_METHOD"] == "POST"):
                 $data["response"] = 1;
                 $data["user"] = array(
                     "id" => $link->insert_id,
-                    "name" => $_POST["lastname"]." ".$_POST["firstname"]." ".$_POST["middlename"]
+                    "name" => $_POST["lastname"]." ".$_POST["firstname"]." ".$_POST["middlename"],
+					"login" => null
                 );
             else:
                 $data["error"] = "Ошибка выполнения SQL-запроса";

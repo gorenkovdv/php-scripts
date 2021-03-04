@@ -9,6 +9,7 @@ $password = "";
 $database = "dbdpo";
 
 $baseURL = "http://localhost:3000/";
+$baseHashURL = "http://localhost:3000/#/";
 $saveFilesPath = $_SERVER['DOCUMENT_ROOT']."/files/";
 
 $link = new mysqli($host, $user, $password, $database) 

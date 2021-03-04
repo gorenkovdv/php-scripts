@@ -20,14 +20,17 @@ if($_SERVER["REQUEST_METHOD"] == "POST"):
 	$ip = $_SERVER['REMOTE_ADDR'];
 
 	$birthdateQuery = ""; if(strlen($_POST["birthdate"])) $birthdateQuery = " AND `birthdate` = ".$birthdate;
-	$sql = "SELECT COUNT(*) FROM `users` WHERE `firstname` = '".$firstname."' AND `lastname` = '".$lastname."' AND `middlename` = '".$middlename."' ".$birthdateQuery;
+	$sql = "SELECT * FROM `users` WHERE `firstname` = '".$firstname."' AND `lastname` = '".$lastname."' AND `middlename` = '".$middlename."' ".$birthdateQuery;
 	$data["sql"][] = $sql;
+	$num_rows = 0;
 	if($dbResult = $link->query($sql)):
 		$num_rows = $dbResult->num_rows;
 	else:
 		$data["error"] = "Ошибка при выполнении запроса";
 		$data["sqlerror"] = $link->error;
 	endif;
+	
+	$data["length"] = $num_rows;
 
 	if(!$num_rows):
 		$object = new GenerateToken();
@@ -47,7 +50,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"):
 			$message = "";
 			$message .= "<html><head><title>Подтверждение учётной записи</title></head><body>";
 			$message .= "<p>Для подтверждения учётной записи перейдите по ссылке:</p>";
-			$message .= "<p><a href=\"{$baseURL}confirm/{$id}/{$key}\" target=\"_blank\">{$baseURL}confirm/{$id}/{$key}</a></p>";
+			$message .= "<p><a href=\"{$baseHashURL}confirm/{$id}/{$key}\" target=\"_blank\">{$baseHashURL}confirm/{$id}/{$key}</a></p>";
 			$message .= "</body></html>";
 			
 			$headers = "";

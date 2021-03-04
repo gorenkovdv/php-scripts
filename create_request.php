@@ -23,12 +23,14 @@ if($_SERVER["REQUEST_METHOD"] == "POST"):
 			$sql = "INSERT INTO `requests_listeners` (`RequestID`, `CourseID`, `UserID`) VALUES ('".$requestID."', '".$courseID."', '".$uid."')";
 			$data["sql"][] = $sql;
 			if($link->query($sql)):
+				$rowID = $link->insert_id;
 				$sql = "SELECT CONCAT_WS(' ', `lastname`, `firstname`, `middlename`) `fullname`, `username`, `last_update` `lastUpdate` FROM `users` WHERE `id` = '".$uid."'";
 				$data["sql"][] = array();
 				if($dbResult = $link->query($sql)):
 					while($arUser = $dbResult->fetch_assoc()):
 						$users[] = array(
 							"id" => $uid,
+							"rowID" => $rowID,
 							"requestID" => $requestID,
 							"username" => $arUser["username"],
 							"lastUpdate" => formatDate("d.m.Y H:i:s", $arResult["lastUpdate"]),
