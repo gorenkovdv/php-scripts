@@ -126,8 +126,9 @@ if($_SERVER["REQUEST_METHOD"] == "POST"):
 						$arResult["users"] = array();
 						$coursesIDs[] = $arResult["ID"];
 						
-						$arResult["BeginDateMonth"] = date('m', strtotime($arResult["RequestDate"]));
-						if($arResult["BeginDateMonth"] < 8): $arResult["StartDateTooltip"] = "проводится дистанционно";
+						$arResult["BeginDateMonth"] = date('m', strtotime($arResult["BeginDate"]));
+						if($arResult["BeginDateMonth"] < 8):
+							$arResult["StartDateTooltip"] = "проводится дистанционно";
 						else:
 							if(!is_null($arResult["FullTimeBeginDate"])):
 								$arResult["StartDateTooltip"] = "очная часть с ".$arResult["FullTimeBeginDate"]." по ".$arResult["FullTimeEndDate"];
