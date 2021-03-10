@@ -2,7 +2,7 @@
 require("./dbconnection.php");
 require("./save_file.php");
 
-$data = array("get" => $_GET, "response" => 0, "sql" => array());
+$data = array("get" => $_GET, "response" => 0, "output" => array(), "sql" => array());
 
 if($_SERVER["REQUEST_METHOD"] == "GET"):
 	foreach($_GET as $key => $value):
@@ -19,14 +19,57 @@ if($_SERVER["REQUEST_METHOD"] == "GET"):
 	$username = strtolower($arUser["username"]);
 	$fullname = $arResult["fullName"];
 	$dir = $saveFilesPath.$username."/";
+
+	$addressPattern = array(
+		'postcode' => '',
+		'country' => '',
+		'region' => '',
+		'locality' => '',
+		'localityType' => 0,
+		'street' => '',
+		'house' => '',
+		'room' => ''
+	);
 	
-	$data["registration"] = new stdClass();
-	$data["fact"] = new stdClass();
-	$data["passport"] = new stdClass();
-	$data["work"] = new stdClass();
-	$data["education"] = new stdClass();
-	$data["sertificates"] = new stdClass();
-	$data["others"] = new stdClass();
+	$data["output"]["registration"] = $addressPattern;
+	$data["output"]["fact"] = $addressPattern;
+	$data["output"]["passport"] = array(
+		'number' => '',
+		'series' => '',
+		'unitCode' => '',
+		'birthPlace' => '',
+		'issuedBy' => '',
+		'issuedDate' => '',
+	);
+	$data["output"]["work"] = array(
+		'postcode' => '',
+		'country' => '',
+		'region' => '',
+		'locality' => '',
+		'localityType' => '',
+		'street' => '',
+		'house' => '',
+		'room' => '',
+		'listenerPosition' => '',
+		'accessionDate' => '',
+		'hrPhone' => '',
+		'workPhone' => '',
+		'fileURL' => null
+	);
+	$data["output"]["education"] = array(
+		'currentDocument' => 0,
+		'currentLevel' => 0,
+		'fullName' => null,
+		'levels' => array(),
+	);
+	$data["output"]["sertificates"] = array(
+		'currentDocument' => 0,
+		'documents' => array()
+	);
+	$data["output"]["others"] = array(
+		'currentDocument' => 0,
+		'documents' => array()
+	);;
 	
 	if(in_array($tab, array(0, 1, 2, 3))):
 		$sql = "SELECT `reg_address`, `fact_address`, `passport`, `work` FROM `users` WHERE `id` = '{$uid}'";
@@ -37,22 +80,19 @@ if($_SERVER["REQUEST_METHOD"] == "GET"):
 			
 			switch($tab):
 				case 0:
-					$jsonRegAddr = json_decode($arData["reg_address"]); if(is_null($jsonRegAddr)) $jsonRegAddr = new stdClass();
-					$data["registration"] = $jsonRegAddr;
+					if(!is_null($arData["reg_address"])) $data["output"]["registration"] = json_decode($arData["reg_address"]);
 					break;
 				case 1:
-					$jsonRegAddr = json_decode($arData["reg_address"]); if(is_null($jsonRegAddr)) $jsonRegAddr = new stdClass();
-					$jsonFactAddr = json_decode($arData["fact_address"]); if(is_null($jsonFactAddr)) $jsonFactAddr = new stdClass();
-					$data["registration"] = $jsonRegAddr;
-					$data["fact"] = $jsonFactAddr;
+					if(!is_null($arData["reg_address"])) $data["output"]["registration"] = json_decode($arData["reg_address"]);
+					if(!is_null($arData["fact_address"])) $data["output"]["fact"] = json_decode($arData["fact_address"]);
 					break;
 				case 2:
-					$jsonPassportData = json_decode($arData["passport"]); if(is_null($jsonPassportData)) $jsonPassportData = new stdClass();
-					$data["passport"] = $jsonPassportData;
+					if(!is_null($arData["passport"])) $data["output"]["passport"] = json_decode($arData["passport"]);
 					break;
 				case 3:
+					if(!is_null($arData["work"])) $data["output"]["work"] = json_decode($arData["work"]);
+
 					$arPositionTypes = array();
-					$jsonWorkData = json_decode($arData["work"]); if(is_null($jsonWorkData)) $jsonWorkData = new stdClass();
 					
 					$sql = "SELECT * FROM `position_types`";
 					if($dbResult = $link->query($sql)):
@@ -62,35 +102,28 @@ if($_SERVER["REQUEST_METHOD"] == "GET"):
 					endif;
 					
 					$data["positionTypes"] = $arPositionTypes;
-					$data["work"] = $jsonWorkData;
 					break;
 				default: break;
 			endswitch;
 		endif;
 	else:
-		switch($tab):
-			case 4:
-				$arEducationTypes = array();
-				$jsonEducationData = array("currentLevel" => 0, "currentDocument" => 0, "fullName" => $fullname, "levels" => array());
-				for($i = 0; $i < 6; $i++) $jsonEducationData["levels"][$i] = array();
-				
-				$sql = "SELECT * FROM `education_types`";
-				$data["sql"][] = $sql;
-				if($dbResult = $link->query($sql)):
-					while($arEducationType = $dbResult->fetch_assoc()):
-						$arEducationTypes[$arEducationType["level"]] = array();
-						foreach($arEducationType as $key => $value):
-							$arEducationTypes[$arEducationType["level"]][$key] = $value;
-						endforeach;
-					endwhile;
-				endif;
-				
-				$data["educationTypes"] = $arEducationTypes;
-				break;
-			case 5: $jsonSertificatesData = array("currentDocument" => 0, "documents" => array()); break;
-			case 6: $jsonOthersData = array("currentDocument" => 0, "documents" => array()); break;
-			default: break;
-		endswitch;
+		if($tab == 4):
+			for($i = 0; $i < 6; $i++) $data["output"]["education"]["levels"][$i] = array();
+			
+			$arEducationTypes = array();
+			$sql = "SELECT * FROM `education_types`";
+			$data["sql"][] = $sql;
+			if($dbResult = $link->query($sql)):
+				while($arEducationType = $dbResult->fetch_assoc()):
+					$arEducationTypes[$arEducationType["level"]] = array();
+					foreach($arEducationType as $key => $value):
+						$arEducationTypes[$arEducationType["level"]][$key] = $value;
+					endforeach;
+				endwhile;
+			endif;
+			
+			$data["output"]["educationTypes"] = $arEducationTypes;
+		endif;
 		
 		$sql = "SELECT * FROM `documents` WHERE `uid` = '{$uid}'";
 		$data["sql"][] = $sql;
@@ -113,20 +146,13 @@ if($_SERVER["REQUEST_METHOD"] == "GET"):
 				
 				if($tab == $arEducation["type"]):
 					switch($tab):
-						case 4: $jsonEducationData["levels"][$arEducation["level"]][] = $outputArr; break;
-						case 5: $jsonSertificatesData["documents"][] = $outputArr; break;
-						case 6: $jsonOthersData["documents"][] = $outputArr; break;
+						case 4: $data["output"]["education"]["levels"][$arEducation["level"]][] = $outputArr; break;
+						case 5: $data["output"]["sertificates"]["documents"][] = $outputArr; break;
+						case 6: $data["output"]["others"]["documents"][] = $outputArr; break;
 						default: break;
 					endswitch;
 				endif;
 			endwhile;
-			
-			switch($tab):
-				case 4: $data["education"] = $jsonEducationData; break;
-				case 5: $data["sertificates"] = $jsonSertificatesData; break;
-				case 6: $data["others"] = $jsonOthersData; break;
-				default: break;
-			endswitch;
 		else:
 			$data["error"] = "Ошибка при выполнении запроса";
 			$data["sqlerror"] = $link->error;
