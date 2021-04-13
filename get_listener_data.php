@@ -54,7 +54,8 @@ if($_SERVER["REQUEST_METHOD"] == "GET"):
 		'accessionDate' => '',
 		'hrPhone' => '',
 		'workPhone' => '',
-		'fileURL' => null
+		'fileURL' => null,
+		'positionTypes' => array()
 	);
 	$data["output"]["education"] = array(
 		'currentDocument' => 0,
@@ -90,18 +91,15 @@ if($_SERVER["REQUEST_METHOD"] == "GET"):
 					if(!is_null($arData["passport"])) $data["output"]["passport"] = json_decode($arData["passport"]);
 					break;
 				case 3:
-					if(!is_null($arData["work"])) $data["output"]["work"] = json_decode($arData["work"]);
-
-					$arPositionTypes = array();
+					if(!is_null($arData["work"])) $data["output"]["work"] = json_decode($arData["work"], true);
 					
+					$data["output"]["work"]["positionTypes"] = array();
 					$sql = "SELECT * FROM `position_types`";
 					if($dbResult = $link->query($sql)):
 						while($arPositionType = $dbResult->fetch_assoc()):
-							$arPositionTypes[] = $arPositionType["type"];
+							$data["output"]["work"]["positionTypes"][] = $arPositionType["type"];
 						endwhile;
 					endif;
-					
-					$data["positionTypes"] = $arPositionTypes;
 					break;
 				default: break;
 			endswitch;

@@ -8,7 +8,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"):
 		$_GET[$key] = htmlspecialchars($value);
 	endforeach;
 	
-	$id = intval($_POST["uid"]);
+	$id = intval($_POST["id"]);
 	$password = $_POST["password"];
 	$key = $_POST["key"];
 	

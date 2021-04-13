@@ -20,20 +20,8 @@ if($_SERVER["REQUEST_METHOD"] == "POST"):
 	$data["sql"][] = $sql;
 	if($dbResult = $link->query($sql)):
 		$arResult = $dbResult->fetch_assoc();
-		$data["rootGroup"] = $arResult["role"];
+		$data["rootGroup"] = intval($arResult["role"]);
 		if($arResult["role"] == 3) $data["rootCathedra"] = $arResult["GUID"];
-	endif;
-	
-	$userRequests = array();
-	$sql = "SELECT rl.`CourseID` FROM `requests_listeners` rl LEFT JOIN `requests` r ON r.`ID` = rl.`RequestID`
-		WHERE rl.`UserID` = '".$uid."' AND r.`IsDeleted` = 0";
-	$data["sql"][] = $sql;
-	if($dbResult = $link->query($sql)):
-		if($dbResult->num_rows > 0):
-			while($arResult = $dbResult->fetch_row()):
-				$userRequests[$arResult[0]] = 1;
-			endwhile;
-		endif;
 	endif;
 	
 	$data["volumeList"] = array();
@@ -123,6 +111,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"):
 				$data["num_rows"] = $dbResult->num_rows;
 				if($dbResult->num_rows > 0):
 					while($arResult = $dbResult->fetch_assoc()):
+						//$arResult["Contractor"] = null;
 						$arResult["users"] = array();
 						$coursesIDs[] = $arResult["ID"];
 						
@@ -138,7 +127,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"):
 					endwhile;
 					
 					$data["coursesIDs"] = $coursesIDs;
-					$sql = "SELECT r.`ID` `requestID`, r.`CourseID`, r.`CourseGUID`, rl.`ID` `rowID`, rl.`UserID`, rl.`Comment`, rl.`CathedraEmployee`, rl.`CathedraComment`, rl.`CathedraCheck`, rl.`CathedraAllow`,
+					$sql = "SELECT r.`ID` `requestID`, r.`Contractor`, r.`CourseID`, r.`CourseGUID`, rl.`ID` `rowID`, rl.`UserID`, rl.`Comment`, rl.`CathedraEmployee`, rl.`CathedraComment`, rl.`CathedraCheck`, rl.`CathedraAllow`,
 						rl.`InstituteEmployee`, rl.`InstituteComment`, rl.`InstituteCheck`, rl.`InstituteAllow`, rl.`RequestCME`, u.`username`, u.`last_update` `lastUpdate`,
 						CONCAT_WS(' ', u.`lastname`, u.`firstname`, u.`middlename`) `fullname`
 						FROM `requests` r LEFT JOIN `requests_listeners` rl ON r.`ID` = rl.`RequestID` LEFT JOIN `users` u ON u.`ID` = rl.`UserID`
@@ -146,18 +135,19 @@ if($_SERVER["REQUEST_METHOD"] == "POST"):
 					$data["sql"][] = $sql;
 					if($dbResult = $link->query($sql)):
 						if($dbResult->num_rows > 0):
-							while($arResult = $dbResult->fetch_assoc()):
+							while($arRequest = $dbResult->fetch_assoc()):
+								$courses[$arRequest["CourseID"]]["Contractor"] = $arRequest["Contractor"];
 								$checks = array(
 									"cathedra" => array(
-										"date" => formatDate("d.m.Y H:i:s", $arResult["CathedraCheck"]),
-										"comment" => $arResult["CathedraComment"],
-										"person" => $arResult["CathedraEmployee"],
+										"date" => formatDate("d.m.Y H:i:s", $arRequest["CathedraCheck"]),
+										"comment" => $arRequest["CathedraComment"],
+										"person" => $arRequest["CathedraEmployee"],
 										"label" => ""
 									),
 									"institute" => array(
-										"date" => formatDate("d.m.Y H:i:s", $arResult["InstituteCheck"]),
-										"comment" => $arResult["InstituteComment"],
-										"person" => $arResult["InstituteEmployee"],
+										"date" => formatDate("d.m.Y H:i:s", $arRequest["InstituteCheck"]),
+										"comment" => $arRequest["InstituteComment"],
+										"person" => $arRequest["InstituteEmployee"],
 										"label" => ""
 									)
 								);
@@ -171,17 +161,17 @@ if($_SERVER["REQUEST_METHOD"] == "POST"):
 								endif;
 
 								
-								$courses[$arResult["CourseID"]]["users"][] = array(
-									"id" => $arResult["UserID"],
-									"requestID" => $arResult["requestID"],
-									"rowID" => $arResult["rowID"],
-									"username" => $arResult["username"],
-									"fullname" => $arResult["fullname"],
-									"lastUpdate" => formatDate("d.m.Y H:i:s", $arResult["lastUpdate"]),
-									"requestCME" => (strlen($arResult["RequestCME"]) > 0) ? $arResult["RequestCME"] : null,
-									"comment" => $arResult["Comment"],
-									"cathedraAllow" => $arResult["CathedraAllow"],
-									"instituteAllow" => $arResult["InstituteAllow"],
+								$courses[$arRequest["CourseID"]]["users"][] = array(
+									"id" => $arRequest["UserID"],
+									"requestID" => $arRequest["requestID"],
+									"rowID" => $arRequest["rowID"],
+									"username" => $arRequest["username"],
+									"fullname" => $arRequest["fullname"],
+									"lastUpdate" => formatDate("d.m.Y H:i:s", $arRequest["lastUpdate"]),
+									"requestCME" => (strlen($arRequest["RequestCME"]) > 0) ? $arRequest["RequestCME"] : null,
+									"comment" => $arRequest["Comment"],
+									"cathedraAllow" => $arRequest["CathedraAllow"],
+									"instituteAllow" => $arRequest["InstituteAllow"],
 									"checks" => $checks
 								);
 

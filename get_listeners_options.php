@@ -5,7 +5,7 @@ $data = array("get" => $_GET, "response" => 0);
 
 if($_SERVER["REQUEST_METHOD"] == "GET"):
     $value = htmlspecialchars(trim($_GET["value"]));
-    $sql = "SELECT u.`id`, u.`username`, CONCAT_WS(' ', u.`lastname`, u.`firstname`, u.`middlename`) `fullname`
+    $sql = "SELECT u.`id`, IFNULL(u.`username`, '') `username`, CONCAT_WS(' ', u.`lastname`, u.`firstname`, u.`middlename`) `fullname`
     FROM `users` u WHERE CONCAT_WS(' ', u.`lastname`, u.`firstname`, u.`middlename`) LIKE '".$value."%'";
     $data["sql"] = $sql;
     $listeners = array();
